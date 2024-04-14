@@ -1,171 +1,52 @@
-Section 4 CSCI 370 Project
-
-Create Table Customers
-CustomerID char(9) primary key,
-OrdersPlaced Number(7),
-name, varchar(40) not null,
-phoneNumber varchar(14),
-email varchar(60),
-company varchar(40),
-website varchar(200); 
-
-Create Table Orders
-orderID varchar(15) primary key,
-placeTime Date,
-customerID char(9) references Customers,
-totalPrice Number(12,2),
-description varchar(2000),
-isAllocated Number(1),
-completionTime Date;
-
-Create Table Employees
-employeeID number(10) primary key,
-name varchar(30),
-phoneNumber varchar(14),
-email varchar(60),
-address varchar(120);
-
-Create Table Services
-serviceID number(12) primary key,
-orderID varchar(15) references Orders,
-provider char(10) references Employees,
-serviceType varchar(30),
-IsCanceled Number(1),
-isCompleted Number(1);
-
-SQL Statements for application.
-
-//Sequences and triggers
-
-Create Sequence EmployeeIDSequence
-start with 1
-increment by 1
-nocycle;
-
-Create or Replace trigger EmployeesInsert
-before insert on Employees
-for each row
-begin
-select EmployeeIDSequence.NEXTVAL
-into :NEW.EmployeeID
-from Dual;
-end;
-
-Create or replace trigger isOrderComplete
-after update on Services
-for each row
-begin
-update orders
-set isCompleted = 1, completionTime = CURRENT_TIME          where :new.orderID = orders.orderID
-and orderID in ( 
-select Orders.orderID 
-from Orders
-where not exists ( 
-select *
-from Services
-where Orders.orderID = Services.orderID 
-and services.isCompleted &lt;&gt; 1));
-end;
 
 //Employee Management 
 
-Insert into Employees (name, phoneNumber, email, address)
-values (:1, :2, :3, :4);
 
-delete from Employees
-where employeeID = :1;
 
-Select *
-from Employees
-where EmployeeID = :1;
 
-Select name
-from Employees 
-where employeeID = :1;
+
 
 //Orders
 
-Select * 
-from orders
-where orderID = :1;
+             search
 
-Select *
-from Orders, Customers
-where Customers.CustomerID = Orders.CustomerID
-and Customers.name like '%' || :1 || '%'
-group by Orders.orderID
-order by Orders.placeTime desc;
+                         search
 
-Select *
-from Orders, Customers
-where Customers.CustomerID = Orders.CustomerID
-and Customers.CustomerID = :1
-group by Orders.orderID
-order by Orders.placeTime desc;
+                         search
 
-Select *
-from Orders, Customers
-where Customers.CustomerID = Orders.CustomerID
-and Customers.email = :1
-group by Orders.orderID
-order by Orders.placeTime desc;
+           search
 
-Select *
-from Orders, Customers
-where Customers.CustomerID = Orders.CustomerID
-and Customers.phoneNumber = :1
-group by Orders.orderID
-order by Orders.placeTime desc;
+          search
 
-Select * 
-from Orders
-where completionTime is not null
-order by completionDate desc;
+          search
+
+            search
 
 Select * 
 from Orders
 where completionTime is null
 and isAllocated = 1
-order by placeTime asc;
+order by placeTime desc;            search
 
-Select * 
-from Orders
-where completionTime is null
-and isAllocated = 1
-order by placeTime desc;
+           search
 
-Select *
-from Orders 
-where completionTime is null
-and isAllocated = 0
-order by placeTime asc;
 
-Select *
-from Orders 
-where completionTime is null
-and isAllocated = 0
-order by placeTime desc;
-
-//Cancelling Order Order itself is cancelled via trigger
-Update Services
-set isCompleted = 1, is Canceled = 1
-where orderID = :1;
 
 //Services
 
 Select serviceID, orderID, provider, serviceType, isCanceled, isCompleted
 from Services
-where ServiceID = :1;
+where ServiceID = :1;            search
 
 Select serviceID, orderID, provider, serviceType, isCanceled, isCompleted
 from Services
-where orderID = :1;
+where orderID = :1;            search
 
 Select Services.serviceID, Orders.orderID, provider, serviceType, Services.isCanceled, Services.isCompleted, Customers.Name
 from Orders join Customers on Customers.CustomerID = Orders.CustomerID join Services on Services.orderID = Orders.orderID
 and Customers.name like '%' || :1 || '%'
 group by Orders.orderID
-order by Orders.placeTime desc, Services. serviceID asc;
+order by Orders.placeTime desc, Services. serviceID asc;            search
 
 Select Services.serviceID, Orders.orderID, Services.provider, Services.serviceType, Services.isCanceled, Services.isCompleted, Customers.name
 from Orders, Customers, Services
@@ -173,14 +54,14 @@ where Customers.CustomerID = Orders.CustomerID
 and Services.OrderID = Orders.OrderID
 and Customers.CustomerID = :1
 group by Orders.orderID
-order by Orders.placeTime desc, Services. serviceID asc;
+order by Orders.placeTime desc, Services. serviceID asc;            search
 
 Select serviceID, orderID, provider, serviceType, isCanceled, isCompleted
 from Orders, Customers
 where Customers.CustomerID = Orders.CustomerID
 and Customers.email = :1
 group by Orders.orderID
-order by Orders.placeTime desc;
+order by Orders.placeTime desc;            search
 
 Select serviceID, Orders.orderID, provider, serviceType, Services.isCanceled, Services.isCompleted, Customers.name
 from Orders, Customers, Services
@@ -188,37 +69,22 @@ where Customers.CustomerID = Orders.CustomerID
 and Services.orderID = Orders.orderID
 and Customers.phoneNumber = :1
 group by Orders.orderID
-order by Orders.placeTime desc, Services. serviceID asc;
+order by Orders.placeTime desc, Services. serviceID asc;            search
 
 Select serviceID, orderID, provider, serviceType, isCanceled 
 from Services
 where IsCompleted = 1;
-order by ServiceID desc;
+order by ServiceID desc;            search
 
 Select serviceID, orderID, provider, serviceType
 from Services
 where IsCompleted = 0;
-order by ServiceID asc;
+order by ServiceID asc;            search
 
 Select serviceID, orderID, provider, serviceType
 from Services
 and isCanceled = 1
-order by ServiceID desc;
+order by ServiceID desc;            search
 
-Update Services
-set IsCompleted = 1, isCanceled = 1
-where ServiceID = :1;
 
-Update Services
-set IsCompleted = 1, isCanceled = 0
-where ServiceID = :1;
 
-//Assigning Employees
-
- Update Services
-set provider = :1, IsAllocated = 1
-where serviceID = :2;
-
-Update Services
-set provider = null, isAllocated = 0
-where ServiceID = :2;
