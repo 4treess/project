@@ -12,9 +12,7 @@ Author: Trevor De Clark, Sno: 665182861, CSCI 370 VIU
 #include <stdexcept>
 using namespace oracle::occi;
 
-#include "functions.h"
-
-#define NUM_OF_COMMANDS 7
+#define NUM_OF_COMMANDS 9
 
 // creates a connection to the oracle db by getting the users login info
 Connection* login(Environment* ptr);

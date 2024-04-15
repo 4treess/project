@@ -3,6 +3,7 @@ Author: Trevor De Clark, Sno: 665182861, CSCI 370 VIU
 */
 
 #include "Main.h"
+#include "functions.cpp"
 
 
 
@@ -19,24 +20,26 @@ int main(){
         return 0;
     }
 
-    std::string commands[NUM_OF_COMMANDS + 1] = {"search", "add", "delete", "cancel", "complete", "remove", "quit", "\0"};
-    std::string functions[NUM_OF_COMMANDS] = {search(), addEmployee(), deleteEmployee(), complete(), cancel(), assign(), remove(), returnTrue()};
+    std::string commands[NUM_OF_COMMANDS + 1] = {"search", "add", "delete", "cancel", "complete", "assign", "remove", "help", "quit", "\0"};
+    bool (*functions[NUM_OF_COMMANDS])(Connection*) = {search, addEmployee, deleteEmployee, cancel, complete, assign, remove, helpScreen returnTrue};
 
 
     std::string input = getUserInput();
-    if(input == "quit"){
-        logoff(enviro, connect);
-        return 0;
-    }
-    if(year == -1){
-        logoff(enviro, connect);
-        return 0;
-    }
-        try{
-
-        }catch(SQLException* excep){
-                std::cerr << "Error! " << excep << "\n";
+    
+    while(true){
+        if(input == "quit"){
+            logoff(enviro, connect);
+            return 0;
         }
+
+        if(processCommand(input, commands, functions, connect)){
+            std::cout <<"\nCommand Processed Sucessfully!\n";
+        }else{
+            std::cout <<"\nError! Command not found! Type \"Help\" for a list of commands\n";
+        }
+        std::cout << "Please Enter Your Command: ";
+        std::string input = getUserInput();
+    }
 
     logoff(enviro, connect);
     return 0;
@@ -135,8 +138,7 @@ bool update(Connection* connect, std::string string, int count){
         Statement* stmt = connect->createStatement(string);
         int i = 0;
         while(i < count){
-            std::string param = "";
-            std::cin >> param;
+            std::string param getUserInput();
             stmt->setString(i++, param);
         }
         int result = stmt->executeUpdate();
@@ -164,8 +166,7 @@ bool query(Connection* connect, std::string string, int count, std::string* colu
         Statement* stmt = connect->createStatement(string);
         int i = 0;
         while(i < count){
-            std::string param = "";
-            std::cin >> param;
+            std::string param = getUserInput();
             stmt->setString(i++, param);
         }
         ResultSet* rs = stmt->executeQuery();
