@@ -1,15 +1,7 @@
 /*
 Author: Trevor De Clark, Sno: 665182861, CSCI 370 VIU
 */
-
-#include "Main.h"
-#include "functions.cpp"
-
-
-
-//Takes the values out of the Resultset and puts them into the array
-void prepareResults(ResultSet* resSet, int* array);
-void prepareResults(ResultSet* resSet, std::string* names, int* counts);
+#include "functions.h"
 
 
 int main(){
@@ -21,9 +13,9 @@ int main(){
     }
 
     std::string commands[NUM_OF_COMMANDS + 1] = {"search", "add", "delete", "cancel", "complete", "assign", "remove", "help", "quit", "\0"};
-    bool (*functions[NUM_OF_COMMANDS])(Connection*) = {search, addEmployee, deleteEmployee, cancel, complete, assign, remove, helpScreen returnTrue};
+    bool (*functions[NUM_OF_COMMANDS])(Connection*) = {search, addEmployee, deleteEmployee, cancel, complete, assign, remove, helpScreen, returnTrue};
 
-
+    std::cout << "Please Enter Your Command:";
     std::string input = getUserInput();
     
     while(true){
@@ -38,7 +30,7 @@ int main(){
             std::cout <<"\nError! Command not found! Type \"Help\" for a list of commands\n";
         }
         std::cout << "Please Enter Your Command: ";
-        std::string input = getUserInput();
+        input = getUserInput();
     }
 
     logoff(enviro, connect);
@@ -96,8 +88,8 @@ std::string getUserInput(){
     std::string input = "";
     std::cin >> input;
 
-    for(std::string::iterator it = year.begin(); it != year.end(); ++it){
-        if(*it > 64 || *it < 91){
+    for(std::string::iterator it = input.begin(); it != input.end(); ++it){
+        if(*it > 64 && *it < 91){
             *it += 32;
         }
     }
@@ -113,11 +105,11 @@ std::string getUserInput(){
 @param: Connection* connect, a pointer to the connection object
 @return: bool: 1 if the command successfully was processed, 0 otherwise
 */
-bool processCommand(std::string &userInput, std::string* commands, bool* functions, Connection* connect){
+bool processCommand(std::string &userInput, std::string* commands, bool (**functions)(Connection*), Connection* connect){
     int i;
     for(i = 0; commands[i] != "\0"; ++i){
         if(userInput == commands[i]){
-            if(functions[i](connect)){
+            if((*functions[i])(connect)){
                 return 1;
             }
             return 0;
@@ -138,12 +130,12 @@ bool update(Connection* connect, std::string string, int count){
         Statement* stmt = connect->createStatement(string);
         int i = 0;
         while(i < count){
-            std::string param getUserInput();
-            stmt->setString(i++, param);
+            std::string param = getUserInput();
+            stmt->setString(++i, param);
         }
         int result = stmt->executeUpdate();
         std::cout << "Updated " << result << " Rows!";
-        connect->termniateStatement(stmt);
+        connect->terminateStatement(stmt);
     }catch(SQLException &except){
         std::cerr << "Error " << except.what() << "\n";
         return 0;
@@ -167,25 +159,27 @@ bool query(Connection* connect, std::string string, int count, std::string* colu
         int i = 0;
         while(i < count){
             std::string param = getUserInput();
-            stmt->setString(i++, param);
+            stmt->setString(++i, param);
         }
         ResultSet* rs = stmt->executeQuery();
 
-        int i = 0;
+        i = 0;
         for(; i < size; i++){
             std::cout << std::setw(maxWidth[i]) << columns[i];
         }
 
-        i = 0;
         std::cout << "\n";
         while(rs->next()){
-            std::cout << std::setw(maxWidth[i]) << rs->getString;
-
-            if(++i >= size){
-                i = 0;
-                std::cout << "\n";
+            for(i = 0; i < size; ++i){
+                std::cout << std::setw(maxWidth[i]) << rs->getString(i+1);
             }
+            std::cout << "\n";
         }
+        stmt->closeResultSet(rs);
+    }catch (SQLException &except){
+        std::cerr << "Error! " << except.getMessage();
+        return 0;
     }
+    return 1;
 }
 

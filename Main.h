@@ -24,7 +24,7 @@ void logoff(Environment* ptr, Connection* ptr2);
 std::string getUserInput();
 
 // Processes the command the user entered, if its valid, it processes it, and returns 1, if not, returns 0
-bool processCommand(std::string &userInput, std::string* commands, bool* functions, connection* connection);
+bool processCommand(std::string &userInput, std::string* commands, bool (**functions)(Connection*), Connection* connection);
 
 // Creates and executes a sql update statement with the given parameters The amount of parameters is indicated by count.
 bool update(Connection* connect, std::string string, int count);

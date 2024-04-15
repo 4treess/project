@@ -1,4 +1,6 @@
-#pragma once
+/*
+Author: Trevor De Clark, Sno: 665182861, CSCI 370 VIU
+*/
 #include "functions.h"
 
 
@@ -12,7 +14,7 @@
 bool search(Connection* connect){
     int optionCount = 3;
     std::string options[optionCount + 1] = {"orders", "services", "employees", "\0"};
-    bool (*functions[optionCount])(Connection*) = {searchOrders(Connection*), searchServices(Connection*), searchEmployees(Connection*)};
+    bool (*functions[optionCount])(Connection*) = {searchOrders, searchServices, searchEmployees};
     std::string option = getUserInput();
 
     return processCommand(option, options, functions, connect);
@@ -30,7 +32,7 @@ bool cancel(Connection* connect){
 
     int i;
     for(i = 0; i < optionCount; ++i){
-        if(option == optionCount[i]){
+        if(option == options[i]){
             break;
         }
     }
@@ -40,9 +42,9 @@ bool cancel(Connection* connect){
 
     std::string string;
     if(i){
-        string = "Update Services set IsCompleted = 1, isCanceled = 1 where ServiceID = :1;"
+        string = "Update Services set IsCompleted = 1, isCanceled = 1 where ServiceID = :1";
     }else{
-        string = "Update Services set isCompleted = 1, is Canceled = 1 where orderID = :1;"
+        string = "Update Services set isCompleted = 1, is Canceled = 1 where orderID = :1";
     }
 
     return update(connect, string, 1);
@@ -54,7 +56,7 @@ bool cancel(Connection* connect){
 @return: true if the command the user inputted exists and it ran properly, false otherwise
 */
 bool complete(Connection* connect){
-    std::string string = "Update Services set IsCompleted = 1, isCanceled = 0 where ServiceID = :1;"
+    std::string string = "Update Services set IsCompleted = 1, isCanceled = 0 where ServiceID = :1";
     return update(connect, string, 1);
 }
 
@@ -64,7 +66,7 @@ bool complete(Connection* connect){
 @return: true if the command the user inputted exists and it ran properly, false otherwise
 */
 bool assign(Connection* connect){
-    std::string string = "Update Services set employeeID = :1, IsAllocated = 1 where serviceID = :2;"
+    std::string string = "Update Services set employeeID = :1, IsAllocated = 1 where serviceID = :2";
     return update(connect, string, 2);
 }
 
@@ -74,17 +76,17 @@ bool assign(Connection* connect){
 @return: true if the command the user inputted exists and it ran properly, false otherwise
 */
 bool remove(Connection* connect){
-    std::string string = "Update Services set employeeID = null, isAllocated = 0 where ServiceID = :1;"
+    std::string string = "Update Services set employeeID = null, isAllocated = 0 where ServiceID = :1";
     return update(connect, string, 1);
 }
 
 
 /*
-@param Connection* connect: The connection object in which statements are created from
+@param Connection* dud: Serves no purpose other tan allowing the function to be called by a specic function pointer
 @return true
 */
-bool returnTrue(Connection* connect){
-    return true
+bool returnTrue(Connection* dud){
+    return true;
 }
 
 /*
@@ -93,7 +95,7 @@ bool returnTrue(Connection* connect){
 @return: true if the command the user inputted exists and it ran properly, false otherwise
 */
 bool addEmployee(Connection* connect){
-    std::string string ="Insert into Employees (name, phoneNumber, email, address) values (:1, :2, :3, :4);";
+    std::string string ="Insert into Employees (name, phoneNumber, email, address) values (:1, :2, :3, :4)";
     return update(connect, string, 4);
 }
 
@@ -103,7 +105,7 @@ bool addEmployee(Connection* connect){
 @return: true if the command the user inputted exists and it ran properly, false otherwise
 */
 bool deleteEmployee(Connection* connect){
-    std::string string ="delete from Employees where employeeID = :1;";
+    std::string string ="delete from Employees where employeeID = :1";
     return update(connect, string, 1);    
 }
 
@@ -112,19 +114,19 @@ bool deleteEmployee(Connection* connect){
 @param Connection* connect: The connection object in which statements are created from
 @return: true if at least one result was outputted, false otherwise
 */
-bool SearchOrders(Connection* connect){
+bool searchOrders(Connection* connect){
     int numberOfCommands = 8;
     std::string input = getUserInput();
     std::string parameters[numberOfCommands] = {"orderid", "name", "customerid", "email", "phonenumber", "completed", "allocated", "new"};
     std::string sql[numberOfCommands] = {
-        "Select * from orders where orderID = :1;",
-        "Select * from Orders, Customers where Customers.CustomerID = Orders.CustomerID and Customers.name like '%' || :1 || '%' group by Orders.orderID order by Orders.placeTime desc;",
-        "Select * from Orders, Customers where Customers.CustomerID = Orders.CustomerID and Customers.CustomerID = :1 group by Orders.orderID order by Orders.placeTime desc;",
-        "Select * from Orders, Customers where Customers.CustomerID = Orders.CustomerID and Customers.email = :1 group by Orders.orderID order by Orders.placeTime desc;",
-        "Select * from Orders, Customers where Customers.CustomerID = Orders.CustomerID and Customers.phoneNumber = :1 group by Orders.orderID order by Orders.placeTime desc;",
-        "Select orderID, customerID, totalPrice, completionTime from (select orderID, customerID, totalPrice, completionTime from Orders where completionTime is not null order by completionTime desc) where rownum >= 20;",
-        "Select orderID, placeTime, customerID, totalPrice from Orders where completionTime is null and isAllocated = 1 order by placeTime asc;",
-        "Select orderID, placeTime, customerID, totalPrice from Orders where completionTime is null and isAllocated = 0 order by placeTime asc;"
+        "Select * from orders where orderID = :1",
+        "Select * from Orders, Customers where Customers.CustomerID = Orders.CustomerID and Customers.name like '%' || :1 || '%' group by Orders.orderID order by Orders.placeTime desc",
+        "Select * from Orders, Customers where Customers.CustomerID = Orders.CustomerID and Customers.CustomerID = :1 group by Orders.orderID order by Orders.placeTime desc",
+        "Select * from Orders, Customers where Customers.CustomerID = Orders.CustomerID and Customers.email = :1 group by Orders.orderID order by Orders.placeTime desc",
+        "Select * from Orders, Customers where Customers.CustomerID = Orders.CustomerID and Customers.phoneNumber = :1 group by Orders.orderID order by Orders.placeTime desc",
+        "Select orderID, customerID, totalPrice, completionTime from (select orderID, customerID, totalPrice, completionTime from Orders where completionTime is not null order by completionTime desc) where rownum >= 20",
+        "Select orderID, placeTime, customerID, totalPrice from Orders where completionTime is null and isAllocated = 1 order by placeTime asc",
+        "Select orderID, placeTime, customerID, totalPrice from Orders where completionTime is null and isAllocated = 0 order by placeTime asc"
     };
 
     int i = 0;
@@ -173,22 +175,22 @@ bool SearchOrders(Connection* connect){
 @param Connection* connect: The connection object in which statements are created from
 @return: true if at least one result was outputted, false otherwise
 */
-bool SearchServices(Connection* connect){
+bool searchServices(Connection* connect){
     int numberOfParams = 10;
-    std::string input getUserInput();
+    std::string input = getUserInput();
 
     std::string parameters[numberOfParams] = {"serviceid", "orderid", "name", "customerid", "email", "phonenumber", "completed", "allocated", "new", "employeeid"};
 
     std::string sql[numberOfParams] = {
-        "Select orderID, employeeID, serviceType, isCanceled, isCompleted from Services where ServiceID = :1;",
-        "Select serviceID, employeeID, serviceType, isCanceled, isCompleted from Services where orderID = :1; ",
-        "Select Services.serviceID, Orders.orderID, employeeID, serviceType, Services.isCanceled, Services.isCompleted, Customers.Name from Orders join Customers on Customers.CustomerID = Orders.CustomerID join Services on Services.orderID = Orders.orderID and Customers.name like '%' || :1 || '%' group by Orders.orderID order by Orders.placeTime desc, Services. serviceID asc;",
-        "Select Services.serviceID, Orders.orderID, Services.employeeID, Services.serviceType, Services.isCanceled, Services.isCompleted, Customers.name from Orders, Customers, Services where Customers.CustomerID = Orders.CustomerID and Services.OrderID = Orders.OrderID and Customers.CustomerID = :1 group by Orders.orderID order by Orders.placeTime desc, Services. serviceID asc;",
-        "Select serviceID, Orders.orderID, employeeID, serviceType, Services.isCanceled, Services.isCompleted, Customers.name from Orders, Customers, Services where Customers.CustomerID = Orders.CustomerID and Services.orderID = Orders.orderID and Customers.email = :1 group by Orders.orderID order by Orders.placeTime desc, Services. serviceID asc; ",
-        "Select serviceID, Orders.orderID, employeeID, serviceType, Services.isCanceled, Services.isCompleted, Customers.name from Orders, Customers, Services where Customers.CustomerID = Orders.CustomerID and Services.orderID = Orders.orderID and Customers.phoneNumber = :1 group by Orders.orderID order by Orders.placeTime desc, Services. serviceID asc; ",
+        "Select orderID, employeeID, serviceType, isCanceled, isCompleted from Services where ServiceID = :1",
+        "Select serviceID, employeeID, serviceType, isCanceled, isCompleted from Services where orderID = :1",
+        "Select Services.serviceID, Orders.orderID, employeeID, serviceType, Services.isCanceled, Services.isCompleted, Customers.Name from Orders join Customers on Customers.CustomerID = Orders.CustomerID join Services on Services.orderID = Orders.orderID and Customers.name like '%' || :1 || '%' group by Orders.orderID order by Orders.placeTime desc, Services. serviceID asc",
+        "Select Services.serviceID, Orders.orderID, Services.employeeID, Services.serviceType, Services.isCanceled, Services.isCompleted, Customers.name from Orders, Customers, Services where Customers.CustomerID = Orders.CustomerID and Services.OrderID = Orders.OrderID and Customers.CustomerID = :1 group by Orders.orderID order by Orders.placeTime desc, Services. serviceID asc",
+        "Select serviceID, Orders.orderID, employeeID, serviceType, Services.isCanceled, Services.isCompleted, Customers.name from Orders, Customers, Services where Customers.CustomerID = Orders.CustomerID and Services.orderID = Orders.orderID and Customers.email = :1 group by Orders.orderID order by Orders.placeTime desc, Services. serviceID asc",
+        "Select serviceID, Orders.orderID, employeeID, serviceType, Services.isCanceled, Services.isCompleted, Customers.name from Orders, Customers, Services where Customers.CustomerID = Orders.CustomerID and Services.orderID = Orders.orderID and Customers.phoneNumber = :1 group by Orders.orderID order by Orders.placeTime desc, Services. serviceID asc",
         "Select serviceID, orderID, employeeID, serviceType, isCanceled from ( Select serviceID, orderID, employeeID, serviceType, isCanceled from Services where IsCompleted = 1; order by ServiceID desc) where rowNum < 30 ",
-        "Select serviceID, orderID, employeeID, serviceType from Services where IsCompleted = 0; order by ServiceID asc;",
-        "Select serviceID, orderID, employeeID, serviceType from Services and isCanceled = 1 order by ServiceID desc; ",
+        "Select serviceID, orderID, employeeID, serviceType from Services where IsCompleted = 0; order by ServiceID asc",
+        "Select serviceID, orderID, employeeID, serviceType from Services and isCanceled = 1 order by ServiceID desc",
         "select serviceID, orderID, name, isCompleted from employees natural join services, where employeeID = :1 order by serviceID desc"
     };
 
@@ -201,7 +203,7 @@ bool SearchServices(Connection* connect){
                 {
                     int numberOfOutputs = 5;
                     std::string columns[numberOfOutputs] = {"ID", "EmployeeID", "ServiceType", "Canceled", "Completed"};
-                    std::string maxWidth[numberOfOutputs] = {15, 10, 30, 1, 1};
+                    int maxWidth[numberOfOutputs] = {15, 10, 30, 1, 1};
                     return query(connect, sql[i] , 1, columns, maxWidth, numberOfOutputs);
                     break;
                 }
@@ -212,7 +214,7 @@ bool SearchServices(Connection* connect){
                 {
                     int numberOfOutputs = 7;
                     std::string columns[numberOfOutputs] = {"ServiceID", "OrderID", "EmployeeID", "Service Type", "Canceled", "Completed", "Customers Name"};
-                    std::string maxWidth[numberOfOutputs] = {12, 15, 10, 30, 1, 1, 40};
+                    int maxWidth[numberOfOutputs] = {12, 15, 10, 30, 1, 1, 40};
                     return query(connect, sql[i] , 1, columns, maxWidth, numberOfOutputs);
                     break;
                 }
@@ -220,17 +222,16 @@ bool SearchServices(Connection* connect){
                 {
                     int numberOfOutputs = 5;
                     std::string columns[numberOfOutputs] = {"ServiceID", "OrderID", "EmployeeID", "Service Type", "Canceled"};
-                    std::string maxWidth[numberOfOutputs] = {12, 15, 10, 30, 1};
+                    int maxWidth[numberOfOutputs] = {12, 15, 10, 30, 1};
                     return query(connect, sql[i] , 0, columns, maxWidth, numberOfOutputs);
                     break;
-                }
                 }
                 case 7:
                 case 8:
                 {
                     int numberOfOutputs = 4;
                     std::string columns[numberOfOutputs] = {"ServiceID", "OrderID", "EmployeeID", "Service Type"};
-                    std::string maxWidth[numberOfOutputs] = {12, 15, 10, 30};
+                    int maxWidth[numberOfOutputs] = {12, 15, 10, 30};
                     return query(connect, sql[i] , 0, columns, maxWidth, numberOfOutputs);
                     break;
                 }
@@ -238,7 +239,7 @@ bool SearchServices(Connection* connect){
                 {
                     int numberOfOutputs = 4;
                     std::string columns[numberOfOutputs] = {"ServiceID", "OrderID", "Employee Name", "Completed"};
-                    std::string maxWidth[numberOfOutputs] = {12, 15, 40, 1};
+                    int maxWidth[numberOfOutputs] = {12, 15, 40, 1};
                     return query(connect, sql[i] , 1, columns, maxWidth, numberOfOutputs);
                     break;
                 }
@@ -259,21 +260,25 @@ bool searchEmployees(Connection* connect){
     int numberOfParams = 5;
     std::string input = getUserInput();
 
-    std::string columns[numberOfParams] = {employeeID, name, phone#, email, address};
+    std::string columns[numberOfParams] = {"employeeID", "name", "phone#", "email", "address"};
     int maxWidth[numberOfParams] = {10, 30, 14, 60, 120};
     if(input == "employeeid"){
-        std::string cmd = "Select * from Employees where EmployeeID = :1; ";
-        query(connect, cmd, 1, columns, maxWidth, numberOfParams);
+        std::string cmd = "Select * from Employees where EmployeeID = :1";
+        return query(connect, cmd, 1, columns, maxWidth, numberOfParams);
     }else{
         if(input == "name"){
-            std::string cmd = "Select * from Employees where name like '%' || :1 || '%' ";
-            query(connect, cmd, 1, columns, maxWidth, numberOfParams);
+            std::string cmd = "Select * from Employees where name = :1";
+            return query(connect, cmd, 1, columns, maxWidth, numberOfParams);
         }
-        return 0
     }
     return 0;
 }
 
+/*
+@brief: Displays a help screen to the user
+@param: Conncetion* dud: Serves on purpose other than allowing the function to be called by a specific function pointer
+@return: true if successful
+*/
 bool helpScreen(Connection* dud){
     std::cout << "\n\n\nItems in () you choose one of the options, items in <> represents where you put the data you are looking for\n"
               << "List of Commands:\n\n"

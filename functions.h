@@ -1,3 +1,4 @@
+#pragma once
 #include "Main.h"
 
 //
@@ -25,10 +26,10 @@ bool addEmployee(Connection* connect);
 bool deleteEmployee(Connection* connect);
 
 //
-bool SearchOrders(Connection* connect);
+bool searchOrders(Connection* connect);
 
 //
-bool SearchServices(Connection* connect);
+bool searchServices(Connection* connect);
 
 //
 bool searchEmployees(Connection* connect);
